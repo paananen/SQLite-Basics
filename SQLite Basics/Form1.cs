@@ -28,21 +28,7 @@ namespace SQLite_Basics
         {
             InitializeComponent();
             txtResult.Text = "The following DB will be created: " + Form1.db.ToString() + Environment.NewLine;
-            //try
-            //{
-            //    //dbConnection.Open();
-            //    dbConnection.SetPassword(password);
-            //    //dbConnection.Close();
-            //    txtResult.AppendText(Environment.NewLine + "DB password set: " + password + Environment.NewLine);
-            //    //password = "newPassword";
-            //    //dbConnection.ChangePassword(password);
-            //}
-            //catch(Exception e)
-            //{
-            //    txtResult.AppendText(Environment.NewLine + "ERROR:" + Environment.NewLine + e.ToString());
-            //    dbConnection.Close();
-            //    txtResult.AppendText(Environment.NewLine + Environment.NewLine + "SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
-            //}
+            //dbConnection.ChangePassword(password);
         }
 
         #region User click events
