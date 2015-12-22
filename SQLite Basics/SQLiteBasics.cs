@@ -52,6 +52,20 @@ namespace SQLite_Basics
             _readFromDB();
         }
 
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            //txtSelectString
+            if (!string.IsNullOrWhiteSpace(txtSelectString.Text))
+            {
+                string selectString = txtSelectString.Text;
+                _SearchDB(selectString);
+            }
+            else
+            {
+                MessageBox.Show("Search field cannot be blank.", "Blank Search Field", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
         private void btnEnter_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(txtName.Text))
@@ -67,6 +81,8 @@ namespace SQLite_Basics
                     if (!string.IsNullOrWhiteSpace(txtScore.Text))
                     {
                         _writeToDB(name, score);
+                        txtName.Text = "";
+                        txtScore.Text = "";
                     }
                     else
                     {
@@ -150,11 +166,11 @@ namespace SQLite_Basics
                 int x = 0;
                 string sql = "";
                 Random rnd = new Random();
-                while (x < 1000)
+                while (x < 100)
                 {
                     x += 1;
                     //generate a random name
-                    int rsn = GetRandomNumber(7, 12);
+                    int rsn = GetRandomNumber(10, 12);
                     string rs = RandomString(rsn);
                     //generate a random score
                     int rn = GetRandomNumber(5, 5000000);
@@ -180,14 +196,23 @@ namespace SQLite_Basics
 
         private void _writeToDB(string name, int score)
         {
-            txtResult.AppendText(Environment.NewLine);
-            dbConnection.Open();
-            string sql = "insert into highscores (name, score) values ('" + name + "', " + score + " )";
+            try
+            {
+                txtResult.AppendText(Environment.NewLine);
+                dbConnection.Open();
+                string sql = "insert into highscores (name, score) values ('" + name + "', " + score + " )";
 
-            SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
-            command.ExecuteNonQuery();
-            txtResult.AppendText("SQL written: " + sql + Environment.NewLine);
-            dbConnection.Close();
+                SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
+                command.ExecuteNonQuery();
+                txtResult.AppendText("SQL written: " + sql + Environment.NewLine);
+                dbConnection.Close();
+            }
+            catch(Exception e)
+            {
+                txtResult.AppendText(Environment.NewLine + "ERROR:" + Environment.NewLine + e.ToString());
+                dbConnection.Close();
+                txtResult.AppendText(Environment.NewLine + Environment.NewLine + "SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
+            }
         }
 
         private void _readFromDB()
@@ -219,8 +244,38 @@ namespace SQLite_Basics
             }
         }
 
+        private void _SearchDB(string s)
+        {
+            try
+            {
+                txtSearchResults.AppendText(Environment.NewLine + Environment.NewLine);
+                dbConnection.Open();
+                txtSearchResults.AppendText("SQLite connection opened: " + dbConnection.State.ToString() + Environment.NewLine);
+
+                string sql = "select * from highscores where name = '" + s + "' order by score desc";
+                SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    txtSearchResults.AppendText(Environment.NewLine + "\tName:\t\t" + reader["name"] + Environment.NewLine);
+
+                    txtSearchResults.AppendText("\tScore:\t\t" + reader["score"] + Environment.NewLine);
+                }
+
+                dbConnection.Close();
+                txtSearchResults.AppendText("SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
+            }
+            catch (Exception e)
+            {
+                txtSearchResults.AppendText(Environment.NewLine + "ERROR:" + Environment.NewLine + e.ToString());
+                dbConnection.Close();
+                txtSearchResults.AppendText(Environment.NewLine + Environment.NewLine + "SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
+            }
+        }
+
         #endregion
 
+        #region generate random stuff
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -234,10 +289,10 @@ namespace SQLite_Basics
         public static int GetRandomNumber(int min, int max)
         {
             lock (syncLock)
-            { // synchronize
+            { 
                 return getrandom.Next(min, max);
             }
         }
-
+        #endregion
     }
 }
