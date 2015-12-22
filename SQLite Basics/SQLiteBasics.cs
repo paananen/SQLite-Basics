@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace SQLite_Basics
 {
-    public partial class Form1 : Form
+    public partial class SQLiteBasics : Form
     {
         #region Class Variables
         
@@ -24,10 +24,10 @@ namespace SQLite_Basics
         private SQLiteConnection dbConnection = new SQLiteConnection("Data Source=" + db + ";Version=3;");
         #endregion
 
-        public Form1()
+        public SQLiteBasics()
         {
             InitializeComponent();
-            txtResult.Text = "The following DB will be created: " + Form1.db.ToString() + Environment.NewLine;
+            txtResult.Text = "The following DB will be created: " + SQLiteBasics.db.ToString() + Environment.NewLine;
             //dbConnection.ChangePassword(password);
         }
 
@@ -44,12 +44,47 @@ namespace SQLite_Basics
 
         private void btnWrite_Click(object sender, EventArgs e)
         {
-            _writeToDB();
+            _writeRandomToDB();
         }
 
         private void btnRead_Click(object sender, EventArgs e)
         {
             _readFromDB();
+        }
+
+        private void btnEnter_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(txtName.Text))
+            {
+                int temp;
+                if (int.TryParse(txtScore.Text, out temp))
+                {
+                    //valid number
+                    string name = txtName.Text;
+                    int score;
+                    score = Convert.ToInt32(txtScore.Text);
+                    score = int.Parse(txtScore.Text);
+                    if (!string.IsNullOrWhiteSpace(txtScore.Text))
+                    {
+                        _writeToDB(name, score);
+                    }
+                    else
+                    {
+                        //No score entered
+                        MessageBox.Show("Score cannot be empty.", "No Score", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                }
+                else
+                {
+                    //Entered text is not a number
+                    MessageBox.Show("You must enter a number.", "That isn't a number...", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+            else
+            {
+                //string is empty
+                MessageBox.Show("Name cannot be empty.", "No Name", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
         }
         #endregion
 
@@ -104,7 +139,7 @@ namespace SQLite_Basics
             }
         }
 
-        private void _writeToDB()
+        private void _writeRandomToDB()
         {
             try
             {
@@ -143,30 +178,44 @@ namespace SQLite_Basics
             }
         }
 
+        private void _writeToDB(string name, int score)
+        {
+            txtResult.AppendText(Environment.NewLine);
+            dbConnection.Open();
+            string sql = "insert into highscores (name, score) values ('" + name + "', " + score + " )";
+
+            SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
+            command.ExecuteNonQuery();
+            txtResult.AppendText("SQL written: " + sql + Environment.NewLine);
+            dbConnection.Close();
+        }
+
         private void _readFromDB()
         {
             try
             {
-                txtResult.AppendText(Environment.NewLine);
+                txtSearchResults.AppendText(Environment.NewLine + Environment.NewLine);
                 dbConnection.Open();
-                txtResult.AppendText("SQLite connection opened: " + dbConnection.State.ToString() + Environment.NewLine);
+                txtSearchResults.AppendText("SQLite connection opened: " + dbConnection.State.ToString() + Environment.NewLine);
 
                 string sql = "select * from highscores order by score desc";
                 SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
                 SQLiteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    txtResult.AppendText(Environment.NewLine + "\tName:\t" + reader["name"] + "\tScore:\t" + reader["score"] + Environment.NewLine);
+                    txtSearchResults.AppendText(Environment.NewLine + "\tName:\t\t" + reader["name"] + Environment.NewLine);
+
+                    txtSearchResults.AppendText("\tScore:\t\t" + reader["score"] + Environment.NewLine);
                 }
                 
                 dbConnection.Close();
-                txtResult.AppendText("SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
+                txtSearchResults.AppendText("SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
             }
             catch (Exception e)
             {
-                txtResult.AppendText(Environment.NewLine + "ERROR:" + Environment.NewLine + e.ToString());
+                txtSearchResults.AppendText(Environment.NewLine + "ERROR:" + Environment.NewLine + e.ToString());
                 dbConnection.Close();
-                txtResult.AppendText(Environment.NewLine + Environment.NewLine + "SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
+                txtSearchResults.AppendText(Environment.NewLine + Environment.NewLine + "SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
             }
         }
 
@@ -179,6 +228,7 @@ namespace SQLite_Basics
             return new string(Enumerable.Repeat(chars, length)
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
         private static readonly Random getrandom = new Random();
         private static readonly object syncLock = new object();
         public static int GetRandomNumber(int min, int max)
