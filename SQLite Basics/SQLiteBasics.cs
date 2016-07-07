@@ -16,7 +16,7 @@ namespace SQLite_Basics
     public partial class SQLiteBasics : Form
     {
         #region Class Variables
-        
+
         public static string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SQLiteBasics");
         public static string db = Path.Combine(dir, "test.sqlite");
         public static string password = "SuperStrongUniquePassword";
@@ -117,7 +117,7 @@ namespace SQLite_Basics
                 if (!File.Exists(db))
                 {
                     SQLiteConnection.CreateFile(db);
-                    result = "DB Created Succesfully - " + db;
+                    result = "DB Created Successfully - " + db;
                 }
                 else
                 {
@@ -182,7 +182,7 @@ namespace SQLite_Basics
                     txtResult.AppendText("SQL " + x.ToString() + " written: " + sql + Environment.NewLine);
                     //insert into DB
                 }
-                
+
                 dbConnection.Close();
                 txtResult.AppendText("SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
             }
@@ -232,7 +232,7 @@ namespace SQLite_Basics
 
                     txtSearchResults.AppendText("\tScore:\t\t" + reader["score"] + Environment.NewLine);
                 }
-                
+
                 dbConnection.Close();
                 txtSearchResults.AppendText("SQLite connection closed: " + dbConnection.State.ToString() + Environment.NewLine);
             }
@@ -289,7 +289,7 @@ namespace SQLite_Basics
         public static int GetRandomNumber(int min, int max)
         {
             lock (syncLock)
-            { 
+            {
                 return getrandom.Next(min, max);
             }
         }
