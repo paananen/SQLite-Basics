@@ -8,3 +8,5 @@ Create a table in this database.
 Write some random junk to the table.
 
 Read from this table.
+
+Search for entries.
